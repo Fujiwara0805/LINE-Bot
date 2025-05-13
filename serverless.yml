@@ -1,0 +1,97 @@
+service: line-palm-reading
+
+frameworkVersion: '3'
+
+plugins:
+  - serverless-dotenv-plugin
+  - serverless-offline
+
+custom:
+  dotenv:
+    path: ./.env
+    logging: true
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: ap-northeast-1
+  timeout: 30
+  logRetentionInDays: 14
+  logs:
+    restApi:
+      accessLogging: false
+      executionLogging: false
+  environment:
+    LINE_CHANNEL_SECRET: ${LINE_CHANNEL_SECRET}
+    LINE_CHANNEL_ACCESS_TOKEN: ${LINE_CHANNEL_ACCESS_TOKEN}
+    OPENAI_API_KEY: ${OPENAI_API_KEY}
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - cloudformation:DescribeStacks
+            - cloudformation:ListStacks
+            - cloudformation:CreateStack
+            - cloudformation:UpdateStack
+            - cloudformation:DeleteStack
+          Resource: "*"
+        - Effect: Allow
+          Action:
+            - s3:*
+          Resource: "*"
+        - Effect: Allow
+          Action:
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+            - logs:DescribeLogGroups
+          Resource: "*"
+        - Effect: Allow
+          Action:
+            - lambda:*
+          Resource: "*"
+        - Effect: Allow
+          Action:
+            - apigateway:*
+          Resource: "*"
+        - Effect: Allow
+          Action:
+            - iam:PassRole
+            - iam:GetRole
+            - iam:CreateRole
+            - iam:DeleteRole
+            - iam:PutRolePolicy
+          Resource: "*"
+
+# CloudWatchロールを明示的に作成
+resources:
+  Resources:
+    ApiGatewayCloudWatchRole:
+      Type: AWS::IAM::Role
+      Properties:
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service: apigateway.amazonaws.com
+              Action: sts:AssumeRole
+        ManagedPolicyArns:
+          - 'arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs'
+        RoleName: serverlessApiGatewayCloudWatchRole
+
+functions:
+  webhook:
+    handler: src/handler.webhook
+    events:
+      - http:
+          path: webhook
+          method: post
+          cors: true
+
+package:
+  patterns:
+    - '!node_modules/.cache/**'
+    - '!.env'
+    - '!.git/**'

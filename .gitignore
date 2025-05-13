@@ -1,0 +1,13 @@
+# パッケージディレクトリ
+node_modules
+jspm_packages
+
+# Serverless ディレクトリ
+.serverless
+
+# 環境変数
+.env
+
+# その他
+.DS_Store
+*.log

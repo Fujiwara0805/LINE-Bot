@@ -1,0 +1,19 @@
+{
+  "name": "line-palm-reading",
+  "version": "1.0.0",
+  "description": "LINEとOpenAI Vision APIを連携した手相占いアプリ",
+  "main": "src/handler.js",
+  "scripts": {
+    "start": "serverless offline",
+    "deploy": "serverless deploy"
+  },
+  "dependencies": {
+    "@line/bot-sdk": "^8.0.0",
+    "openai": "^4.20.0"
+  },
+  "devDependencies": {
+    "serverless": "^3.35.2",
+    "serverless-dotenv-plugin": "^6.0.0",
+    "serverless-offline": "^13.3.0"
+  }
+}
